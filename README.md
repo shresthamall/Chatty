@@ -1,69 +1,140 @@
-# React + TypeScript + Vite
+# Chatty - AI Chatbot Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Chatty is a full-stack AI-powered chat application built with React, TypeScript, Hasura GraphQL, and Nhost. It features real-time messaging, user authentication, and AI-powered responses using OpenRouter.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 Email-based authentication with Nhost Auth
+- 💬 Real-time chat with GraphQL Subscriptions
+- 🤖 AI-powered responses via OpenRouter
+- 🚀 Serverless architecture with Hasura and Nhost
+- 🔄 Real-time updates with GraphQL Subscriptions
+- 🔒 Row-Level Security (RLS) for data isolation
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: CSS Modules
+- **State Management**: Apollo Client
+- **Authentication**: Nhost Auth
+- **Database & API**: Hasura GraphQL Engine
+- **Workflow Automation**: n8n
+- **AI**: OpenRouter
+- **Deployment**: Netlify
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Node.js 18+
+- NPM or Yarn
+- Nhost account
+- Hasura Cloud or self-hosted Hasura
+- n8n instance
+- OpenRouter API key
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/chatty.git
+cd chatty
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+# or
+yarn install
 ```
+
+### 3. Environment Setup
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+VITE_NHOST_SUBDOMAIN=your-nhost-subdomain
+VITE_NHOST_REGION=your-nhost-region
+VITE_GRAPHQL_URL=https://your-hasura-endpoint/v1/graphql
+VITE_NHOST_WEBHOOK_SECRET=your-webhook-secret
+```
+
+### 4. Start the development server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+## Project Structure
+
+```
+src/
+├── components/      # Reusable UI components
+├── graphql/         # GraphQL operations and client setup
+├── pages/           # Page components
+│   ├── Auth.tsx     # Authentication page
+│   └── Chat.tsx     # Main chat interface
+├── utils/           # Utility functions
+└── App.tsx          # Main application component
+```
+
+## Database Schema
+
+The application uses the following database schema with Row-Level Security (RLS) enabled:
+
+### Tables
+
+#### `chats`
+- `id` (uuid, primary key)
+- `created_at` (timestamptz)
+- `updated_at` (timestamptz)
+- `user_id` (uuid, foreign key to auth.users)
+- `title` (text)
+
+#### `messages`
+- `id` (uuid, primary key)
+- `chat_id` (uuid, foreign key to chats)
+- `content` (text)
+- `created_at` (timestamptz)
+- `role` (enum: 'user', 'assistant')
+
+## GraphQL API
+
+The application uses the following GraphQL operations:
+
+### Queries
+- `GetChats` - Fetch user's chat list
+- `GetMessages` - Fetch messages for a specific chat
+
+### Mutations
+- `InsertChat` - Create a new chat
+- `InsertMessage` - Add a new message
+- `SendMessage` - Custom mutation that triggers the AI response
+
+### Subscriptions
+- `OnNewMessage` - Real-time updates for new messages
+
+## n8n Workflow
+
+The n8n workflow handles AI responses:
+1. Receives webhook from Hasura Action
+2. Validates user permissions
+3. Calls OpenRouter API
+4. Saves response to database
+5. Returns the AI's reply
+
+## Deployment
+
+### Netlify Deployment
+
+1. Connect your repository to Netlify
+2. Set up the following environment variables in Netlify:
+   - `VITE_NHOST_SUBDOMAIN`
+   - `VITE_NHOST_REGION`
+   - `VITE_GRAPHQL_URL`
+   - `VITE_NHOST_WEBHOOK_SECRET`
+3. Set the build command: `npm run build`
+4. Set the publish directory: `dist`
+5. Deploy!
